@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Kualitas Air Sungai</title>
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Sidebar Kontrol -->
+    <aside class="sidebar">
+      <h2>Panel Kontrol</h2>
+      <div class="kontrol">
+        <label for="sungai">Pilih Sungai:</label>
+        <select id="sungai">
+          <option value="gajahwong">Sungai Gajahwong</option>
+          <option value="code">Sungai Code</option>
+          <option value="winongo">Sungai Winongo</option>
+        </select>
+      </div>
+      <div class="kontrol">
+        <label>Periode Waktu:</label>
+        <input type="radio" name="periode" value="hari" checked> Hari<br>
+        <input type="radio" name="periode" value="minggu"> Minggu<br>
+        <input type="radio" name="periode" value="bulan"> Bulan
+      </div>
+    </aside>
+
+    <!-- Konten Utama -->
+    <div class="content-wrapper">
+      <main class="main-content">
+        <h1>Sistem Pemantauan Kualitas Air Sungai Kota Yogyakarta</h1>
+        <p>Pemantauan dan data kualitas air sungai untuk masyarakat daerah aliran sungai.</p>
+
+        <h2>Lokasi Pemantauan</h2>
+        <div id="map"></div>
+
+        <section class="summary-container">
+          <h2>Kualitas Air Sungai Gajahwong</h2>
+          <div class="summary-grid">
+            <div>
+              <h3>pH</h3>
+              <p class="value">7.22</p>
+              <small>↑ 0.22 dari netral</small>
+            </div>
+            <div>
+              <h3>Suhu</h3>
+              <p class="value">19.7°C</p>
+              <small>↓ 0.3°C dari ideal</small>
+            </div>
+            <div>
+              <h3>Kekeruhan</h3>
+              <p class="value">78.6 NTU</p>
+            </div>
+            <div>
+              <h3>TDS</h3>
+              <p class="value">695 mg/L</p>
+            </div>
+          </div>
+
+          <div class="status-section">
+            <div>
+              <div class="status-container">
+               <h2>Status Keseluruhan</h2>
+               <p class="status baik">Baik</p>
+              </div>
+            </div>
+            <div>
+              <h3>Masalah Utama</h3>
+              <div class="issue">Kekeruhan tinggi (78,6 NTU)</div>
+              <div class="issue">TDS tinggi (695 mg/L)</div>
+            </div>
+          </div>
+        </section>
+
+        <div class="trend-box">
+          <h2>Tren Kualitas Air</h2>
+          <p>Data historis berdasarkan periode yang dipilih</p>
+        
+          <div class="tabs">
+            <button onclick="tampilkanGrafik('ph')">pH</button>
+            <button onclick="tampilkanGrafik('suhu')">Suhu</button>
+            <button onclick="tampilkanGrafik('kekeruhan')">Kekeruhan</button>
+            <button onclick="tampilkanGrafik('tds')">TDS</button>
+          </div>
+        
+          <!-- GRAFIK -->
+          <div id="grafik-ph" class="grafik-box">📊 Grafik pH</div>
+          <div id="grafik-suhu" class="grafik-box" style="display: none;">🌡️ Grafik Suhu</div>
+          <div id="grafik-kekeruhan" class="grafik-box" style="display: none;">💧 Grafik Kekeruhan</div>
+          <div id="grafik-tds" class="grafik-box" style="display: none;">🧪 Grafik TDS</div>
+        
+          <!-- INTERPRETASI -->
+          <div id="interpretasi-ph" class="ph-interpretasi">
+            <summary>Interpretasi pH</summary>
+            <ul>
+              <li>pH 6.5–8.5: Kondisi ideal untuk kehidupan air</li>
+              <li>pH < 6.5: Terlalu asam, berbahaya bagi ikan dan mikroorganisme</li>
+              <li>pH > 8.5: Terlalu basa, bisa menandakan limbah kimia</li>
+            </ul>
+          </div>
+        
+          <div id="interpretasi-suhu" class="ph-interpretasi" style="display: none;">
+            <summary>Interpretasi Suhu</summary>
+            <ul>
+              <li>20–30°C: Suhu ideal untuk sungai tropis</li>
+              <li>> 35°C: Bisa membahayakan ikan & merusak ekosistem</li>
+              <li>Peningkatan suhu bisa menurunkan oksigen terlarut</li>
+            </ul>
+          </div>
+        
+          <div id="interpretasi-kekeruhan" class="ph-interpretasi" style="display: none;">
+            <summary>Interpretasi Kekeruhan</summary>
+            <ul>
+              <li>25 NTU: Baik, air jernih</li>
+              <li>25–100 NTU: Sedang, partikel mulai terlihat</li>
+              <li>> 100 NTU: Buruk, bisa ganggu fotosintesis & pernapasan ikan</li>
+            </ul>
+          </div>
+        
+          <div id="interpretasi-tds" class="ph-interpretasi" style="display: none;">
+            <summary>Interpretasi TDS</summary>
+            <ul>
+              <li>300 ppm: Air sangat murni</li>
+              <li>300–500 ppm: Masih baik untuk lingkungan</li>
+              <li>> 1000 ppm: Terlalu tinggi, kemungkinan tercemar limbah</li>
+            </ul>
+          </div>
+        </div>
+          </details>
+        </section>
+        <section class="water-parameters">
+          <h1>Penjelasan Parameter Kualitas Air</h1>
+          <p>Memahami parameter kualitas air penting untuk membuat keputusan yang tepat tentang penggunaan air. Berikut adalah informasi tentang setiap parameter yang kami pantau.</p>
+        
+        
+<details class="ph-interpretasi">
+  <summary>pH - Ukuran Keasaman dan Kebasaan</summary>
+  <div class="accordion-content">
+
+    <!-- Bagian "Apa itu pH?" -->
+    <div class="accordion-box" style="margin-bottom: 2rem;">
+      <h2>Apa itu pH?</h2>
+      <p>pH mengukur seberapa asam atau basa (alkali) air.</p>
+      <ul>
+        <li>pH di bawah 7: Asam</li>
+        <li>pH 7: Netral</li>
+        <li>pH di atas 7: Basa</li>
+      </ul>
+    </div>
+
+    <!-- Bagian Rentang Normal -->
+    <div class="accordion-box" style="margin-bottom: 2rem;">
+      <h3>Rentang Normal</h3>
+      <p><strong>Ideal:</strong> 6,5 – 8,5</p>
+      <h4>Jika terlalu rendah (asam):</h4>
+      <ul>
+        <li>Rasa logam</li>
+        <li>Korosi pipa</li>
+        <li>Kematian ikan</li>
+      </ul>
+      <h4>Jika terlalu tinggi (basa):</h4>
+      <ul>
+        <li>Rasa pahit</li>
+      </ul>
+    </div>
+
+    <!-- Bagian Mengapa pH Penting -->
+    <div style="margin-top: 1rem;">
+      <h3>Mengapa pH penting?</h3>
+      <ul>
+        <li><strong>Kehidupan akuatik:</strong> Sebagian besar organisme berkembang di pH 6,5–8,5</li>
+        <li><strong>Reaksi kimia:</strong> Mempengaruhi cara zat berperilaku di dalam air</li>
+        <li><strong>Efektivitas pengolahan:</strong> Memengaruhi desinfeksi dan pengolahan kimia</li>
+        <li><strong>Infrastruktur:</strong> Air yang asam dapat mengkorosi pipa dan peralatan</li>
+      </ul>
+    </div>
+
+    <!-- Bagian Variasi dan Perubahan pH -->
+    <div style="margin-top: 1rem;">
+      <h3>Penyebab alami variasi pH:</h3>
+      <ul>
+        <li>Fitur geologis (kapur meningkatkan pH, granit menurunkan pH)</li>
+        <li>Fotosintesis (meningkatkan pH saat siang hari)</li>
+        <li>Curah hujan (sedikit asam)</li>
+      </ul>
+
+      <h3>Sumber perubahan pH yang mengkhawatirkan:</h3>
+      <ul>
+        <li>Pembuangan industri</li>
+        <li>Drainase tambang (sering sangat asam)</li>
+        <li>Limpasan pertanian</li>
+      </ul>
+    </div>
+
+  </div>
+</details>
+
+        
+          <!-- Tambahkan parameter lainnya -->
+          <details>
+            <summary>Suhu - Kondisi Termal</summary>
+           
+            <!-- Bagian "Apa itu pH?" -->
+           <div class="accordion-box" style="margin-bottom: 2rem;">
+            <h2>Apa itu Suhu Air</h2>
+            <p>Suhu mengukur energi termal molekul air. Sungai secara alami bervariasi dalam suhu berdasarkan musim, waktu hari, kedalaman, dan keteduhan.</p>
+          </div>
+
+          <div class="accordion-box" style="margin-bottom: 2rem;">
+           <h3>Rentang Normal</h3>
+            <p><strong>Ideal:</strong> 15°C – 25°C</p>
+            <h4>Jika terlalu tinggi:</h4>
+            <ul>
+            <li>Penurunan kadar oksigen</li>
+            <li>Tekanan pada spesies air dingin</li>
+            <li>Peningkatan pertumbuhan alga</li>
+            <li>Kadar bakteri lebih tinggi</li>
+            </ul>
+            <h4>Jika terlalu rendah:</h4>
+            <ul>
+            <li>Aktivitas biologis melambat</li>
+            <li>Metabolisme menurun pada kehidupan akuatik</li>
+            <li>Keanekaragaman biologis terbatas</li>
+           </ul>
+          </div>
+
+          <div class="accordion-box" style="margin-bottom: 2rem;">
+           <h3>Metode pengujian</h3>
+            
+            <ul>
+            <li>Termometer digital</li>
+            <li>Sensor inframerah</li>
+            <li>Pencatat data</li>
+            </ul>
+          </div>
+          <div style="margin-top: 1rem;">
+            <h3>Suhu memengaruhi:</h3>
+              <ul>
+                <li>Kadar oksigen: Air yang lebih hangat menyimpan lebih sedikit oksigen terlarut</li>
+                <li>Laju metabolisme: Mengontrol kecepatan proses biologis dan kimia</li>
+                <li>Distribusi spesies: Organisme berbeda berkembang pada suhu berbeda</li>
+                <li>Toksisitas polutan: Banyak zat menjadi lebih beracun pada suhu lebih tinggi</li>
+              </ul>
+
+            <h3>Perubahan Suhu Alami vs. Mengkhawatirkan</h3>
+            <h4>Penyebab alami variasi suhu:</h4>
+              <ul>
+                <li>Perubahan musiman</li>
+                <li>Siklus harian (diurnal)</li>
+                <li>Kedalaman dan laju aliran sungai</li>
+                <li>Keteduhan dari vegetasi</li>
+              </ul>
+              <h4>Sumber perubahan suhu yang mengkhawatirkan:</h4>
+              <ul>
+                <li>Polusi termal dari pembuangan industri</li>
+                <li>Penghilangan vegetasi tepi sungai (penyangga riparian)</li>
+                <li>Limpasan perkotaan dari permukaan yang panas</li>
+                <li>Perubahan iklim (tren pemanasan jangka panjang)</li>
+              </ul>
+            </div>
+
+          </details>
+        
+          <details>
+            <summary>Kekeruhan - Kejernihan Air</summary>
+            <div class="accordion-content">
+              <p>Kekeruhan tinggi dapat mengganggu fotosintesis tumbuhan air...</p>
+            </div>
+          </details>
+        
+          <details>
+            <summary>TDS (Total Zat Terlarut) - Material Terlarut</summary>
+            <div class="accordion-content">
+              <p>TDS menunjukkan jumlah zat terlarut dalam air seperti mineral, garam, logam...</p>
+            </div>
+          </details>
+        
+          <details>
+            <summary>Bagaimana Kualitas Air Diukur</summary>
+            <div class="accordion-content">
+              <p>Kualitas air diukur menggunakan sensor, alat uji laboratorium, dan interpretasi visual berdasarkan parameter standar.</p>
+            </div>
+          </details>
+        </section>        
+      </main>
+
+      <!-- Footer dalam content-wrapper -->
+      <footer class="footer-info">
+        <p>📡 Sistem Pemantauan Kualitas Air Sungai untuk Masyarakat Daerah Aliran Sungai</p>
+        <p>📊 Data ini untuk tujuan penelitian. Harap verifikasi sebelum digunakan.</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+</html> 
